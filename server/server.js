@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 const {mongoose} = require('./db/mongoose');
 const {Todo} = require('./models/todo.js');
 const {User} = require('./models/user.js');
+const {authenticate} = require('./middleware/authenticate');
 
 const {ObjectID} = require('mongodb');
 
@@ -99,13 +100,17 @@ app.post('/users', (req, res) => {
   user.save().then(() => {
     return user.generateAuthToken();
   }).then((token) => {
-    res.header('x-auth', token).send(user);
+    res.header('x-auth', token).send(user);   //sets header
   }).catch((e) => {
     res.status(400).send(e);
   });
 });
 
 
+
+app.get('/users/me', authenticate, (req, res) => {
+  res.send(req.user);
+});
 
 app.listen(port, () => {
   console.log(`Started up on port ${port}`);
